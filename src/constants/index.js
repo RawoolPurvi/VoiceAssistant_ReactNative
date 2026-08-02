@@ -1,3 +1,6 @@
+import { OPENAI_API_KEY } from '@env';
+export const apiKey = OPENAI_API_KEY;
+
 export const dummyMessages = [
     {
         role: 'user',

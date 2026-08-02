@@ -1,16 +1,19 @@
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, Easing, PermissionsAndroid, Platform } from 'react-native'
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, Easing, PermissionsAndroid, Platform, Alert } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import Features from '../components/features'
 import { dummyMessages } from '../constants/index.js'
 import Voice from '@react-native-voice/voice';
+import { apiCall } from '../api/openAI.js'
 
 const HomeScreen = () => {
-  const [messages, setMessages] = useState(dummyMessages);
+  const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
-  const [speaking, setSpeaking] = useState(true);
+  const [speaking, setSpeaking] = useState(false);
+  const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('');
+  const ScrollViewRef = useRef()
 
   const requestMicPermission = async () => {
     if (Platform.OS !== 'android') return true;
@@ -57,6 +60,34 @@ const HomeScreen = () => {
     }
   }
 
+  const fetchResponse = (spokenText) => {
+    const text = spokenText?.trim();
+    if (!text) return;
+    setMessages(prev => {
+      const newMessages = [...prev, { role: 'user', content: text }];
+      updateScrollView();
+      setLoading(true);
+      apiCall(text, newMessages).then(res => {
+        // console.log('got api data:', res);
+        setLoading(false)
+        if (res.success) {
+          setMessages([...res.data]);
+          updateScrollView();
+          setResult('');
+        } else {
+          Alert.alert(`Error: ${res.message}`)
+        }
+      });
+      return newMessages;
+    });
+  }
+
+  const updateScrollView = () => {
+    setTimeout(() => {
+      ScrollViewRef?.current?.scrollToEnd({ animated: true })
+    })
+  }
+
   const clearMessages = () => {
     setMessages([]);
   }
@@ -76,7 +107,10 @@ const HomeScreen = () => {
     Voice.onSpeechResults = (e) => {
       console.log('voice results:', e.value);
       const text = e?.value?.[0];
-      setResult(text);
+      if (text) {
+        setResult(text);
+        fetchResponse(text);
+      }
     };
     Voice.onSpeechPartialResults = (e) => {
       const word = e?.value?.[0];
@@ -133,16 +167,17 @@ const HomeScreen = () => {
             <Text style={styles.messageText}>Assistant</Text>
             <View style={styles.textBox}>
               <ScrollView
+                ref={ScrollViewRef}
                 bounces={false}
                 showsVerticalScrollIndicator={false}>
                 {
                   messages.map((message, index) => {
                     if (message.role === 'assistant') {
-                      if (message.content.includes('http')) {
+                      if (message.type === 'image') {
                         // it's a AI image
                         return (
                           <View key={index} style={styles.AssistantWrapper}>
-                            <View style={styles.AssistantBox}>
+                            <View style={styles.imageBox}>
                               <Image source={{ uri: message.content }} style={styles.assistantImage} />
                             </View>
                           </View>
@@ -195,18 +230,26 @@ const HomeScreen = () => {
 
         {/* centre — recording icon */}
         <View style={styles.bottomCentre}>
-          {recording ? (
-            <TouchableOpacity onPress={stopRecording}>
-              <Animated.Image
-                source={require('../../assets/images/loading.png')}
-                style={[styles.recordingIcon, { transform: [{ rotate: spin }] }]}
+          {
+            loading ? (
+              <Image source={require('../../assets/images/loading.png')}
+              style={styles.recordingIcon}
               />
-            </TouchableOpacity>
+            ):
+              recording ? (
+          <TouchableOpacity onPress={stopRecording}>
+            <Animated.Image
+              source={require('../../assets/images/loading.png')}
+              style={[styles.recordingIcon, { transform: [{ rotate: spin }] }]}
+            />
+          </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={startRecording}>
-              <Image source={require('../../assets/images/recordingIconDark.png')} style={styles.recordingIcon} />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity onPress={startRecording}>
+            <Image source={require('../../assets/images/recordingIconDark.png')} style={styles.recordingIcon} />
+          </TouchableOpacity>
+          )
+          }
+
         </View>
 
         {/* right — clear button or empty spacer */}
@@ -315,10 +358,16 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontFamily: 'serif',
   },
+  imageBox: {
+    borderRadius: wp(3),
+    overflow: 'hidden',
+    marginVertical: hp(1),
+    marginLeft: wp(2),
+  },
   assistantImage: {
-    resizeMode: 'contain',
     width: wp(60),
-    height: hp(60),
+    height: wp(60),
+    resizeMode: 'cover',
   },
   contentWrapper: {
     flex: 1,
