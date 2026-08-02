@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native'
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Animated, Easing, PermissionsAndroid, Platform } from 'react-native'
 import React, { useState, useEffect, useRef } from 'react'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen'
 import Features from '../components/features'
@@ -10,14 +10,89 @@ const HomeScreen = () => {
   const [recording, setRecording] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const [speaking, setSpeaking] = useState(true);
+  const [result, setResult] = useState('');
+
+  const requestMicPermission = async () => {
+    if (Platform.OS !== 'android') return true;
+    const already = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+    );
+    if (already) return true;
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        {
+          title: 'Microphone Permission',
+          message: 'AURA needs access to your microphone to hear you.',
+          buttonPositive: 'Allow',
+          buttonNegative: 'Deny',
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch {
+      return false;
+    }
+  }
+
+  const startRecording = async () => {
+    const hasPermission = await requestMicPermission();
+    if (!hasPermission) {
+      console.warn('Microphone permission denied');
+      return;
+    }
+    try {
+      await Voice.start('en-US', { EXTRA_PARTIAL_RESULTS: true });
+      setRecording(true);
+    } catch (error) {
+      console.error('Error starting recording:', error);
+    }
+  }
+
+  const stopRecording = async () => {
+    try {
+      await Voice.stop();
+      setRecording(false);
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+    }
+  }
 
   const clearMessages = () => {
     setMessages([]);
   }
 
-  const stopSpeaking =() => {
+  const stopSpeaking = () => {
     setSpeaking(false);
   }
+
+  useEffect(() => {
+    Voice.onSpeechStart = () => {
+      console.log('Speech started');
+    };
+    Voice.onSpeechEnd = () => {
+      console.log('Speech ended');
+      setRecording(false);
+    };
+    Voice.onSpeechResults = (e) => {
+      console.log('voice results:', e.value);
+      const text = e?.value?.[0];
+      setResult(text);
+    };
+    Voice.onSpeechPartialResults = (e) => {
+      const word = e?.value?.[0];
+      if (!word) return;
+      console.log('voice partial:', word);
+    };
+    Voice.onSpeechError = (e) => {
+      const code = String(e?.error?.code);
+      if (code === '2' || code === '7') return; // ignore network/no-match transients
+      console.log('Speech error:', e);
+      setRecording(false);
+    };
+    return () => {
+      Voice.destroy().then(() => Voice.removeAllListeners());
+    };
+  }, [])
 
   useEffect(() => {
     if (recording) {
@@ -39,6 +114,8 @@ const HomeScreen = () => {
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
+
+  // console.log('messages:', result);
 
   return (
     <View style={styles.page}>
@@ -119,14 +196,14 @@ const HomeScreen = () => {
         {/* centre — recording icon */}
         <View style={styles.bottomCentre}>
           {recording ? (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={stopRecording}>
               <Animated.Image
-                source={require('../../assets/images/recordingIconDark.png')}
+                source={require('../../assets/images/loading.png')}
                 style={[styles.recordingIcon, { transform: [{ rotate: spin }] }]}
               />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity>
+            <TouchableOpacity onPress={startRecording}>
               <Image source={require('../../assets/images/recordingIconDark.png')} style={styles.recordingIcon} />
             </TouchableOpacity>
           )}
