@@ -20,13 +20,17 @@ export const apiCall = async (prompt, messages) => {
             model: 'gpt-3.5-turbo',
             messages: [
                 {
+                    role: 'system',
+                    content: 'You are a classifier. Reply with only the single word "yes" or "no". No punctuation, no explanation.'
+                },
+                {
                     role: 'user',
-                    content: 'Does this message want to generate an AI picture, image, art or anything similar? "' + prompt + '" . If yes, then return yes and nothing else, if no, then return no and nothing else.'
+                    content: 'Does this message explicitly ask to generate, create, draw, or make an image, picture, painting, photo, or artwork? Message: "' + prompt + '"'
                 }
             ]
         });
         const isArt = res.data?.choices[0]?.message?.content?.trim().toLowerCase();
-        console.log('isArt:', isArt);
+        console.log('isArt raw:', JSON.stringify(isArt));
         if (isArt === 'yes') {
             console.log('DALL-E api call');
             return dalleApiCall(prompt, messages || []);

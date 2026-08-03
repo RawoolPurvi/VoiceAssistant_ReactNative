@@ -5,6 +5,7 @@ import Features from '../components/features'
 import { dummyMessages } from '../constants/index.js'
 import Voice from '@react-native-voice/voice';
 import { apiCall } from '../api/openAI.js'
+import Tts from 'react-native-tts';
 
 const HomeScreen = () => {
   const [messages, setMessages] = useState([]);
@@ -46,6 +47,7 @@ const HomeScreen = () => {
     try {
       await Voice.start('en-US', { EXTRA_PARTIAL_RESULTS: true });
       setRecording(true);
+      Tts.stop();
     } catch (error) {
       console.error('Error starting recording:', error);
     }
@@ -74,12 +76,33 @@ const HomeScreen = () => {
           setMessages([...res.data]);
           updateScrollView();
           setResult('');
+          startTextToSpeech(res.data[res.data.length - 1]);
         } else {
           Alert.alert(`Error: ${res.message}`)
         }
       });
       return newMessages;
     });
+  }
+
+  const startTextToSpeech = (message) => {
+    if (!message.content.includes("http"))
+      setSpeaking(true)
+    {
+      // IOS
+      Tts.speak(message.content, {
+        iosVoiceId: 'com.apple.ttsbundle.Moira-compact',
+        rate: 0.5,
+      });
+      // Android
+      Tts.speak(message.content, {
+        androidParams: {
+          KEY_PARAM_PAN: -1,
+          KEY_PARAM_VOLUME: 0.5,
+          KEY_PARAM_STREAM: 'STREAM_MUSIC',
+        },
+      });
+    }
   }
 
   const updateScrollView = () => {
@@ -90,9 +113,11 @@ const HomeScreen = () => {
 
   const clearMessages = () => {
     setMessages([]);
+    Tts.stop();
   }
 
   const stopSpeaking = () => {
+    Tts.stop();
     setSpeaking(false);
   }
 
@@ -123,6 +148,12 @@ const HomeScreen = () => {
       console.log('Speech error:', e);
       setRecording(false);
     };
+
+    // tts event handlers
+    Tts.addEventListener('tts-start', (event) => console.log("start", event));
+    Tts.addEventListener('tts-progress', (event) => console.log("progress", event));
+    Tts.addEventListener('tts-finish', (event) => console.log("finish", event));
+    Tts.addEventListener('tts-cancel', (event) => console.log("cancel", event));
     return () => {
       Voice.destroy().then(() => Voice.removeAllListeners());
     };
@@ -233,21 +264,21 @@ const HomeScreen = () => {
           {
             loading ? (
               <Image source={require('../../assets/images/loading.png')}
-              style={styles.recordingIcon}
+                style={styles.recordingIcon}
               />
-            ):
+            ) :
               recording ? (
-          <TouchableOpacity onPress={stopRecording}>
-            <Animated.Image
-              source={require('../../assets/images/loading.png')}
-              style={[styles.recordingIcon, { transform: [{ rotate: spin }] }]}
-            />
-          </TouchableOpacity>
-          ) : (
-          <TouchableOpacity onPress={startRecording}>
-            <Image source={require('../../assets/images/recordingIconDark.png')} style={styles.recordingIcon} />
-          </TouchableOpacity>
-          )
+                <TouchableOpacity onPress={stopRecording}>
+                  <Animated.Image
+                    source={require('../../assets/images/loading.png')}
+                    style={[styles.recordingIcon, { transform: [{ rotate: spin }] }]}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity onPress={startRecording}>
+                  <Image source={require('../../assets/images/recordingIconDark.png')} style={styles.recordingIcon} />
+                </TouchableOpacity>
+              )
           }
 
         </View>
