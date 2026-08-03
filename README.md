@@ -1,97 +1,231 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🤖 AURA – AI Voice Assistant
 
-# Getting Started
+AURA is an AI-powered Voice Assistant built with **React Native** that allows users to interact naturally using their voice.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+The assistant can understand spoken commands, answer questions using **ChatGPT**, generate AI images using **DALL·E**, and even speak responses back to the user using Text-to-Speech.
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📱 Demo
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+> 🔊 **Turn on the sound to experience the complete demo.**
 
-```sh
-# Using npm
-npm start
+https://github.com/user-attachments/assets/your-demo-video
 
-# OR using Yarn
-yarn start
+*(Replace the above link with your uploaded GitHub video or GIF.)*
+
+---
+
+## ✨ Features
+
+- 🎙️ Voice-to-Text using Speech Recognition
+- 🤖 AI-powered conversations using ChatGPT
+- 🎨 AI image generation using DALL·E
+- 🗣️ Text-to-Speech responses
+- 🧠 Conversation memory for contextual follow-up questions
+- 🌙 Modern Dark UI
+- 📱 Fully responsive design
+
+---
+
+## 💡 Example Conversation
+
+**User:**
+
+> What is React Native?
+
+**AURA:**
+
+> React Native is an open-source framework developed by Meta...
+
+**User:**
+
+> Compare it with React.js
+
+AURA remembers the previous conversation and automatically compares **React Native** with **React.js** without asking the user to repeat the context.
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+- React Native CLI
+- JavaScript
+- React Navigation
+
+### APIs
+
+- OpenAI ChatGPT API
+- OpenAI Image Generation API (DALL·E / GPT Image)
+
+### Libraries
+
+- Axios
+- react-native-responsive-screen
+- @react-native-voice/voice
+- react-native-tts
+
+---
+
+
+## 🧠 Architecture
+
+```
+User
+   │
+   ▼
+Speech Recognition
+   │
+   ▼
+Voice → Text
+   │
+   ▼
+Detect Request Type
+   │
+   ├───────────────┐
+   ▼               ▼
+ChatGPT        DALL·E
+(Text)         (Images)
+   │               │
+   └───────┬───────┘
+           ▼
+Conversation History
+           ▼
+Text-to-Speech
+           ▼
+Display Result
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 🚀 Installation
 
-### Android
+Clone the repository
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```bash
+git clone https://github.com/RawoolPurvi/VoiceAssistant_ReactNative.git
 ```
 
-### iOS
+Go inside the project
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+cd VoiceAssistant_ReactNative
 ```
 
-Then, and every time you update your native dependencies, run:
+Install dependencies
 
-```sh
-bundle exec pod install
+```bash
+npm install
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Install iOS Pods
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+```bash
+cd ios
+pod install
+cd ..
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Run Android
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```bash
+npx react-native run-android
+```
 
-## Step 3: Modify your app
+Run iOS
 
-Now that you have successfully run the app, let's make changes!
+```bash
+npx react-native run-ios
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+---
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 🔑 Environment Variables
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Create a `.env` file or update your constants file.
 
-## Congratulations! :tada:
+```javascript
+export const apiKey = "YOUR_OPENAI_API_KEY";
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+Never commit your API key.
 
-### Now what?
+---
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+## 📂 Project Structure
 
-# Troubleshooting
+```
+src
+│
+├── api
+│     └── openAI.js
+│
+├── components
+│     ├── Features.js
+│     └── Message.js
+│
+├── constants
+│
+├── navigation
+│
+├── screens
+│     └── HomeScreen.js
+│
+└── assets
+      ├── images
+      └── icons
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+---
 
-# Learn More
+## 📚 What I Learned
 
-To learn more about React Native, take a look at the following resources:
+While building AURA, I gained hands-on experience with:
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- React Native Development
+- Native Android Modules
+- Speech Recognition APIs
+- Text-to-Speech
+- OpenAI API Integration
+- AI Image Generation
+- API Design
+- State Management
+- Responsive Mobile UI
+- React Hooks
+- Asynchronous Programming
+
+---
+
+## 🔮 Future Improvements
+
+- 🌍 Multi-language support
+- 💬 Streaming AI responses
+- 🔊 Better voice selection
+- 📷 Camera integration
+- 📄 PDF summarization
+- 🎵 Voice customization
+- 📌 Chat history persistence
+- ☁️ Cloud synchronization
+
+---
+
+## 👨‍💻 Author
+
+**Purvi Rawool**
+
+Frontend Developer | React Native Developer
+
+LinkedIn:
+https://www.linkedin.com/in/YOUR-LINKEDIN
+
+GitHub:
+https://github.com/RawoolPurvi
+
+---
+
+## ⭐ Support
+
+If you found this project useful, consider giving it a ⭐ on GitHub.
+
+It helps others discover the project and motivates me to build more!
