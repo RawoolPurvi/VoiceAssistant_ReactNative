@@ -10,9 +10,7 @@ The assistant can understand spoken commands, answer questions using **ChatGPT**
 
 > 🔊 **Turn on the sound to experience the complete demo.**
 
-https://github.com/user-attachments/assets/your-demo-video
-
-*(Replace the above link with your uploaded GitHub video or GIF.)*
+https://github.com/user-attachments/assets/42b01a80-e0c3-4f7c-a4a3-3d8dacca32f2
 
 ---
 
@@ -217,7 +215,7 @@ While building AURA, I gained hands-on experience with:
 Frontend Developer | React Native Developer
 
 LinkedIn:
-https://www.linkedin.com/in/YOUR-LINKEDIN
+https://www.linkedin.com/in/purvi-rawool-402873219/
 
 GitHub:
 https://github.com/RawoolPurvi
